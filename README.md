@@ -6,7 +6,7 @@
 MathQuest is a puzzle-based mathematics learning platform designed for primary-school children (ages 7–11) and their guardians.
 
 - **Production URL**: [https://mathquest.mainuddintalukdar.cloud](https://mathquest.mainuddintalukdar.cloud)
-- **Deployment Host**: Hostinger VPS (`srv1702496`) behind an existing global Caddy reverse proxy (`stack-caddy-1`) on the `stack` Docker network.
+- **Deployment Host**: Hostinger VPS behind an existing global Caddy reverse proxy (`stack-caddy-1`) on the `stack` Docker network.
 - **Database & Auth**: Supabase Cloud PostgreSQL with Row Level Security (RLS) and Passwordless Guardian Auth.
 - **Architecture**:
   - `apps/web`: Next.js 16 (App Router, TypeScript 7, React 19) standalone container acting as authenticated Backend-for-Frontend (BFF).
