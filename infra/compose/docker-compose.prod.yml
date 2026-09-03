@@ -1,0 +1,61 @@
+services:
+  mathquest-web:
+    image: ghcr.io/${GHCR_OWNER:-qmainuddin}/mathquest-web:${IMAGE_TAG}
+    container_name: mathquest-web
+    restart: unless-stopped
+    env_file:
+      - /opt/mathquest/.env.production
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+      - SCORING_SERVICE_URL=http://mathquest-scoring:8005
+    networks:
+      - stack
+      - mathquest-internal
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    cap_add:
+      - NET_BIND_SERVICE
+    read_only: true
+    tmpfs:
+      - /tmp:rw,noexec,nosuid,size=64m
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1:3000/api/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
+
+  mathquest-scoring:
+    image: ghcr.io/${GHCR_OWNER:-qmainuddin}/mathquest-scoring:${IMAGE_TAG}
+    container_name: mathquest-scoring
+    restart: unless-stopped
+    env_file:
+      - /opt/mathquest/.env.production
+    environment:
+      - PORT=8005
+      - HOST=0.0.0.0
+    networks:
+      - mathquest-internal
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    read_only: true
+    tmpfs:
+      - /tmp:rw,noexec,nosuid,size=64m
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8005/healthz')"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+
+networks:
+  stack:
+    external: true
+  mathquest-internal:
+    driver: bridge
+    internal: true

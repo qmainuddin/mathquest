@@ -1,0 +1,4 @@
+mathquest.mainuddintalukdar.cloud {
+    encode zstd gzip
+    reverse_proxy mathquest-web:3000
+}

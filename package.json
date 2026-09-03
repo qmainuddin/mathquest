@@ -1,0 +1,25 @@
+{
+  "name": "mathquest-monorepo",
+  "version": "1.0.0",
+  "private": true,
+  "packageManager": "pnpm@11.25.0",
+  "engines": {
+    "node": "24.20.0"
+  },
+  "scripts": {
+    "dev": "pnpm --filter @mathquest/web dev",
+    "build": "pnpm --filter \"@mathquest/*\" build",
+    "lint": "pnpm --filter \"@mathquest/*\" lint",
+    "format-check": "pnpm --filter \"@mathquest/*\" format-check",
+    "typecheck": "pnpm --filter \"@mathquest/*\" typecheck",
+    "test": "pnpm --filter \"@mathquest/*\" test",
+    "test:unit": "pnpm --filter @mathquest/web test:unit",
+    "test:integration": "pnpm --filter @mathquest/web test:integration",
+    "test:e2e": "pnpm --filter @mathquest/web test:e2e"
+  },
+  "devDependencies": {
+    "@mathquest/shared-config": "workspace:*",
+    "supabase": "2.116.0",
+    "typescript": "7.0.2"
+  }
+}

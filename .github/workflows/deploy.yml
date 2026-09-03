@@ -1,0 +1,94 @@
+name: Deploy
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: production-deployment
+  cancel-in-progress: false
+
+jobs:
+  build-and-push:
+    name: Build & Push Release Images
+    runs-on: ubuntu-latest
+    environment: production
+    outputs:
+      release_sha: ${{ steps.vars.outputs.sha }}
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+
+      - name: Compute Release SHA
+        id: vars
+        run: echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+
+      - uses: docker/setup-buildx-action@b5ca514318bd6ebac0fb2aedd5d36ec1b5c232a2 # v3.10.0
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@9780b0c442fbb1117ed29e0efdff1e18412f7567 # v3.3.0
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build & Push Web Image
+        uses: docker/build-push-action@471d1dc4e07e5cdedd4c2171150001c434f0b7a4 # v6.15.0
+        with:
+          context: .
+          file: apps/web/Dockerfile
+          push: true
+          tags: ghcr.io/${{ github.repository_owner }}/mathquest-web:${{ steps.vars.outputs.sha }}
+
+      - name: Build & Push Scoring Image
+        uses: docker/build-push-action@471d1dc4e07e5cdedd4c2171150001c434f0b7a4 # v6.15.0
+        with:
+          context: ./services/scoring
+          file: ./services/scoring/Dockerfile
+          push: true
+          tags: ghcr.io/${{ github.repository_owner }}/mathquest-scoring:${{ steps.vars.outputs.sha }}
+
+  deploy-to-vps:
+    name: Deploy to Hostinger VPS
+    needs: build-and-push
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+
+      - name: Setup SSH Known Hosts
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.VPS_KNOWN_HOSTS }}" >> ~/.ssh/known_hosts
+          chmod 644 ~/.ssh/known_hosts
+
+      - name: Transfer Deployment Files & Execute
+        env:
+          RELEASE_SHA: ${{ needs.build-and-push.outputs.release_sha }}
+          VPS_HOST: ${{ secrets.VPS_HOST }}
+          VPS_USER: ${{ secrets.VPS_USER || 'deploy' }}
+          SSH_KEY: ${{ secrets.VPS_SSH_KEY }}
+        run: |
+          eval "$(ssh-agent -s)"
+          echo "$SSH_KEY" | tr -d '\r' | ssh-add - >/dev/null
+
+          # Sync compose and scripts to VPS
+          scp -r infra/compose/docker-compose.prod.yml infra/scripts "${VPS_USER}@${VPS_HOST}:/opt/mathquest/"
+
+          # Authenticate GHCR and run deploy.sh
+          ssh "${VPS_USER}@${VPS_HOST}" << EOF
+            set -euo pipefail
+            echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u "${{ github.actor }}" --password-stdin
+            export GHCR_OWNER="${{ github.repository_owner }}"
+            /opt/mathquest/infra/scripts/deploy.sh "${RELEASE_SHA}"
+          EOF
+
+      - name: Record Deployment Summary
+        run: |
+          echo "### Deployment Complete" >> "$GITHUB_STEP_SUMMARY"
+          echo "- **Release SHA**: \`${{ needs.build-and-push.outputs.release_sha }}\`" >> "$GITHUB_STEP_SUMMARY"
+          echo "- **Target URL**: [https://mathquest.mainuddintalukdar.cloud](https://mathquest.mainuddintalukdar.cloud)" >> "$GITHUB_STEP_SUMMARY"
+          echo "- **Health Endpoint**: [https://mathquest.mainuddintalukdar.cloud/api/health](https://mathquest.mainuddintalukdar.cloud/api/health)" >> "$GITHUB_STEP_SUMMARY"

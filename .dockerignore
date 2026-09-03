@@ -1,0 +1,17 @@
+node_modules
+.next
+.git
+.gitignore
+.dockerignore
+README.md
+docs
+.pytest_cache
+__pycache__
+*.pyc
+.venv
+.coverage
+htmlcov
+test-results
+playwright-report
+.env*
+!.env.example

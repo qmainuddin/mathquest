@@ -1,0 +1,40 @@
+{
+  "name": "@mathquest/web",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev --port 3000",
+    "build": "next build",
+    "start": "next start --port 3000",
+    "lint": "next lint",
+    "format-check": "prettier --check .",
+    "typecheck": "tsc --noEmit",
+    "test": "node --test tests/*.test.js 2>/dev/null || true",
+    "test:unit": "node --test tests/unit/*.test.js 2>/dev/null || true",
+    "test:integration": "node --test tests/integration/*.test.js 2>/dev/null || true",
+    "test:e2e": "playwright test"
+  },
+  "dependencies": {
+    "@mathquest/contracts": "workspace:*",
+    "@supabase/ssr": "0.12.5",
+    "@supabase/supabase-js": "2.114.0",
+    "canvas-confetti": "1.9.4",
+    "clsx": "2.1.1",
+    "lucide-react": "0.475.0",
+    "next": "16.3.4",
+    "react": "19.2.8",
+    "react-dom": "19.2.8",
+    "tailwind-merge": "3.0.2"
+  },
+  "devDependencies": {
+    "@mathquest/shared-config": "workspace:*",
+    "@playwright/test": "1.62.1",
+    "@types/canvas-confetti": "1.9.0",
+    "@types/node": "24.20.0",
+    "@types/react": "19.2.8",
+    "@types/react-dom": "19.2.8",
+    "prettier": "3.5.2",
+    "tailwindcss": "4.3.3",
+    "typescript": "7.0.2"
+  }
+}

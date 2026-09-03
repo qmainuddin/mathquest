@@ -1,0 +1,29 @@
+name: Security Audit
+
+on:
+  schedule:
+    - cron: "0 4 * * 1" # Every Monday at 04:00 UTC
+  workflow_dispatch:
+
+jobs:
+  audit:
+    name: Security & Vulnerability Scan
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+
+      - uses: pnpm/action-setup@a7487c7e89a18df4991f7f222e4898a00d66ddda # v4.1.0
+        with:
+          version: "11.25.0"
+
+      - uses: actions/setup-node@1d0ff469b7ec7b3cb9d8673fde0c81c44821de2a # v4.2.0
+        with:
+          node-version: "24.20.0"
+
+      - name: Audit JavaScript Dependencies
+        run: pnpm audit --audit-level=high || true
+
+      - name: Scan Policy Invariants
+        run: |
+          bash infra/scripts/check-runtime-consistency.sh
+          bash infra/scripts/check-dependency-policy.sh
