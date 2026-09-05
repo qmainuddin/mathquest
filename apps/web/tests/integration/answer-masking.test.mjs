@@ -48,3 +48,38 @@ test('Answer Masking: Stored procedures strictly isolate question_solutions tabl
     'question_solutions must have NO client SELECT policy'
   );
 });
+
+test('Answer Masking: Every seeded question has a private server-side solution mapping', () => {
+  const mockDataPath = path.resolve('apps/web/lib/mock-data.ts');
+  const content = fs.readFileSync(mockDataPath, 'utf8');
+
+  // Extract all question IDs from INITIAL_QUESTIONS
+  const questionIdMatches = [...content.matchAll(/id:\s*'([0-9a-fA-F-]{36})'/g)];
+  assert.ok(questionIdMatches.length > 0, 'Must have question IDs');
+
+  // Extract solutions block
+  const solutionsMatch = content.match(/export const MOCK_SOLUTIONS[\s\S]*?;\n/);
+  assert.ok(solutionsMatch, 'MOCK_SOLUTIONS must be defined');
+  const solutionsBlock = solutionsMatch[0];
+
+  for (const match of questionIdMatches) {
+    const qId = match[1];
+    assert.ok(
+      solutionsBlock.includes(qId),
+      `Private solution mapping missing for question ${qId}`
+    );
+  }
+});
+
+test('Answer Masking: Security definer functions strictly lock search_path', () => {
+  const migrationPath = path.resolve('supabase/migrations/20260903000003_secure_question_answers.sql');
+  const content = fs.readFileSync(migrationPath, 'utf8');
+
+  // Verify evaluate_question_answer is SECURITY DEFINER with fixed search_path
+  assert.ok(content.includes('FUNCTION public.evaluate_question_answer'));
+  assert.ok(content.includes('SECURITY DEFINER'));
+  assert.ok(content.includes('SET search_path = public'));
+
+  // Verify delete_child_data is SECURITY DEFINER with fixed search_path
+  assert.ok(content.includes('FUNCTION public.delete_child_data'));
+});

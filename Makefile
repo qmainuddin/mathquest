@@ -1,5 +1,6 @@
 SHELL := /bin/bash
 export PATH := /opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:$(PATH)
+PYTHON := $(shell if [ -x /opt/homebrew/bin/python3 ]; then echo /opt/homebrew/bin/python3; else command -v python3 || echo python3; fi)
 
 .PHONY: all versions setup dev lint format-check typecheck test test-unit test-integration test-e2e build docker-build dependency-check check-runtime-consistency migration-check migrate seed health deploy rollback
 
@@ -54,7 +55,7 @@ test: test-unit test-integration
 
 test-unit:
 	@echo "=== Running Python Scoring Engine Tests ==="
-	@PYTHONPATH=services/scoring python3 -c "from app.schemas import AttemptSummary, RecommendRequest; from app.engine import RuleBasedScoringEngine; from app.recommender import TopicRecommender; engine = RuleBasedScoringEngine(); attempts = [AttemptSummary(question_id='q1', attempt_number=1, is_correct=True, duration_ms=10000), AttemptSummary(question_id='q2', attempt_number=1, is_correct=True, duration_ms=12000), AttemptSummary(question_id='q3', attempt_number=1, is_correct=True, duration_ms=15000)]; res = engine.calculate_score('c1', 't1', attempts); assert res.score == 100.0; assert res.is_sufficient_data is True; print('Scoring Engine Unit Tests Passed!')"
+	@$(PYTHON) services/scoring/tests/runner.py
 	@echo "=== Running Web Unit Tests ==="
 	@node --test apps/web/tests/unit/*.test.mjs
 
