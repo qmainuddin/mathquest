@@ -31,10 +31,45 @@ export async function POST(req: NextRequest) {
     }
 
     let isCorrect = false;
-    const submittedVal = String(submittedAnswer?.value || submittedAnswer?.choiceId || '').trim();
-    const correctVal = String(solution.correct.value || solution.correct.choiceId || '').trim();
 
-    if (submittedVal.toLowerCase() === correctVal.toLowerCase()) {
+    const subChoiceId = submittedAnswer?.choiceId
+      ? String(submittedAnswer.choiceId).trim().toLowerCase()
+      : null;
+    const subValue =
+      submittedAnswer?.value !== undefined && submittedAnswer?.value !== null
+        ? String(submittedAnswer.value).trim().toLowerCase()
+        : null;
+
+    const solChoiceId = solution.correct?.choiceId
+      ? String(solution.correct.choiceId).trim().toLowerCase()
+      : null;
+    const solValue =
+      solution.correct?.value !== undefined && solution.correct?.value !== null
+        ? String(solution.correct.value).trim().toLowerCase()
+        : null;
+
+    // 1. Exact match on choice identifier (e.g. 'a' === 'a')
+    if (subChoiceId && solChoiceId && subChoiceId === solChoiceId) {
+      isCorrect = true;
+    }
+    // 2. Exact match on textual answer value (e.g. '47' === '47' or '1/4' === '1/4')
+    else if (subValue && solValue && subValue === solValue) {
+      isCorrect = true;
+    }
+    // 3. Numeric normalization match (e.g. '047' === '47' or 47 === 47)
+    else if (
+      subValue !== null &&
+      solValue !== null &&
+      !isNaN(Number(subValue)) &&
+      !isNaN(Number(solValue)) &&
+      Number(subValue) === Number(solValue)
+    ) {
+      isCorrect = true;
+    }
+    // 4. Cross-match: client sent value as choiceId or choiceId as value
+    else if (subChoiceId && solValue && subChoiceId === solValue) {
+      isCorrect = true;
+    } else if (subValue && solChoiceId && subValue === solChoiceId) {
       isCorrect = true;
     }
 

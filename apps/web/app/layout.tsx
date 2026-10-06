@@ -12,8 +12,11 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en">
-      <body className="antialiased min-h-screen flex flex-col bg-slate-50 text-slate-900">
+    <html lang="en" suppressHydrationWarning>
+      <body
+        className="antialiased min-h-screen flex flex-col bg-slate-50 text-slate-900"
+        suppressHydrationWarning
+      >
         <header className="border-b border-slate-200 bg-white sticky top-0 z-50">
           <div className="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between">
             <a href="/" className="flex items-center gap-2 text-xl font-bold text-indigo-600 focus:rounded-md">

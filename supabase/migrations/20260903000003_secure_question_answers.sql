@@ -29,10 +29,16 @@ BEGIN
         RAISE EXCEPTION 'Question solution not found for question %', p_question_id;
     END IF;
 
-    -- Compare submitted answer with correct answer (JSON equality or numeric normalization)
+    -- Compare submitted answer with correct answer (JSON equality, value, or choiceId)
     IF p_submitted_answer = v_correct_answer THEN
         v_is_correct := true;
-    ELSIF p_submitted_answer->>'value' = v_correct_answer->>'value' THEN
+    ELSIF p_submitted_answer->>'choiceId' = v_correct_answer->>'choiceId' AND p_submitted_answer->>'choiceId' IS NOT NULL THEN
+        v_is_correct := true;
+    ELSIF p_submitted_answer->>'value' = v_correct_answer->>'value' AND p_submitted_answer->>'value' IS NOT NULL THEN
+        v_is_correct := true;
+    ELSIF p_submitted_answer->>'choiceId' = v_correct_answer->>'value' AND p_submitted_answer->>'choiceId' IS NOT NULL THEN
+        v_is_correct := true;
+    ELSIF p_submitted_answer->>'value' = v_correct_answer->>'choiceId' AND p_submitted_answer->>'value' IS NOT NULL THEN
         v_is_correct := true;
     ELSE
         v_is_correct := false;

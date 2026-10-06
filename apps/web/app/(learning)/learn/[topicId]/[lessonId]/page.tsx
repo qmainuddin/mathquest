@@ -11,7 +11,7 @@ export default function LessonPlayerPage() {
   const topicId = params.topicId as string;
   const lessonId = params.lessonId as string;
 
-  const [questions, setQuestions] = useState<Question[]>([]);
+  const [questions, setQuestions] = useState<Question[]>(() => INITIAL_QUESTIONS[lessonId] || []);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [selectedChoice, setSelectedChoice] = useState<string>('');
   const [numericValue, setNumericValue] = useState<string>('');
@@ -20,6 +20,7 @@ export default function LessonPlayerPage() {
   const [submitting, setSubmitting] = useState<boolean>(false);
   const [attemptsLog, setAttemptsLog] = useState<any[]>([]);
 
+  const attemptsLogRef = useRef<any[]>([]);
   const questionStartTimeRef = useRef<number>(Date.now());
   const attemptCountRef = useRef<number>(1);
   const hintUsedRef = useRef<boolean>(false);
@@ -28,6 +29,13 @@ export default function LessonPlayerPage() {
     // Load safe questions (answers are absent)
     const list = INITIAL_QUESTIONS[lessonId] || [];
     setQuestions(list);
+    setCurrentIndex(0);
+    setSelectedChoice('');
+    setNumericValue('');
+    setShowHint(false);
+    setFeedback(null);
+    attemptsLogRef.current = [];
+    setAttemptsLog([]);
     questionStartTimeRef.current = Date.now();
     attemptCountRef.current = 1;
     hintUsedRef.current = false;
@@ -43,10 +51,11 @@ export default function LessonPlayerPage() {
   const handleSubmitAnswer = async () => {
     if (!currentQuestion) return;
 
+    const selectedOption = currentQuestion.options?.choices?.find((c) => c.id === selectedChoice);
     const answerPayload =
       currentQuestion.questionType === 'numeric_input'
-        ? { value: numericValue }
-        : { choiceId: selectedChoice };
+        ? { value: numericValue.trim() }
+        : { choiceId: selectedChoice, value: selectedOption?.label || selectedChoice };
 
     if (!answerPayload.value && !answerPayload.choiceId) {
       alert('Please choose or enter an answer first!');
@@ -77,17 +86,16 @@ export default function LessonPlayerPage() {
         message: data.explanation,
       });
 
-      // Record in session attempts log
-      setAttemptsLog((prev) => [
-        ...prev,
-        {
-          questionId: currentQuestion.id,
-          attemptNumber: attemptCountRef.current,
-          isCorrect: data.isCorrect,
-          usedHint: hintUsedRef.current,
-          durationMs,
-        },
-      ]);
+      // Record in session attempts log ref & state
+      const attemptEntry = {
+        questionId: currentQuestion.id,
+        attemptNumber: attemptCountRef.current,
+        isCorrect: data.isCorrect,
+        usedHint: hintUsedRef.current,
+        durationMs,
+      };
+      attemptsLogRef.current.push(attemptEntry);
+      setAttemptsLog((prev) => [...prev, attemptEntry]);
 
       if (data.isCorrect) {
         // Correct answer! Advance after a short pleasant pause
@@ -127,7 +135,7 @@ export default function LessonPlayerPage() {
           childId: 'active-child',
           topicId,
           lessonId,
-          attempts: attemptsLog,
+          attempts: attemptsLogRef.current,
         }),
       });
       const results = await res.json();
@@ -238,9 +246,19 @@ export default function LessonPlayerPage() {
             </label>
             <input
               id="num-input"
-              type="number"
+              type="text"
+              inputMode="numeric"
+              pattern="[0-9]*"
               value={numericValue}
-              onChange={(e) => setNumericValue(e.target.value)}
+              onChange={(e) => {
+                setNumericValue(e.target.value);
+                setFeedback(null);
+              }}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  handleSubmitAnswer();
+                }
+              }}
               placeholder={currentQuestion.options?.placeholder || 'Type your number here'}
               className="w-full text-2xl font-bold text-center px-4 py-4 rounded-xl border-2 border-slate-300 focus:border-indigo-600 focus:ring-0"
             />
@@ -251,14 +269,22 @@ export default function LessonPlayerPage() {
               <button
                 key={choice.id}
                 type="button"
-                onClick={() => setSelectedChoice(choice.id)}
+                onClick={() => {
+                  setSelectedChoice(choice.id);
+                  setFeedback(null);
+                }}
                 className={`p-5 rounded-2xl border-2 font-bold text-lg text-left transition-all ${
                   selectedChoice === choice.id
-                    ? 'border-indigo-600 bg-indigo-50 text-indigo-900 shadow-sm'
+                    ? 'border-indigo-600 bg-indigo-50 text-indigo-900 shadow-sm ring-2 ring-indigo-200'
                     : 'border-slate-200 bg-slate-50 hover:bg-white text-slate-800'
                 }`}
               >
-                {choice.label}
+                <div className="flex items-center justify-between">
+                  <span>{choice.label}</span>
+                  {selectedChoice === choice.id && (
+                    <span className="text-indigo-600 font-bold">✓</span>
+                  )}
+                </div>
               </button>
             ))}
           </div>

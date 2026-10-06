@@ -104,6 +104,51 @@ export const INITIAL_QUESTIONS: Record<string, Question[]> = {
       orderIndex: 2,
     },
   ],
+  ns_place_value_1000: [
+    {
+      id: '11111111-1111-4111-8111-111111111201',
+      lessonId: 'ns_place_value_1000',
+      prompt: 'What number is made of 5 hundreds, 3 tens, and 8 ones?',
+      questionType: 'multiple_choice',
+      options: {
+        choices: [
+          { id: 'a', label: '538' },
+          { id: 'b', label: '358' },
+          { id: 'c', label: '835' },
+          { id: 'd', label: '583' },
+        ],
+      },
+      hint: 'Combine 500 + 30 + 8.',
+      orderIndex: 1,
+    },
+    {
+      id: '11111111-1111-4111-8111-111111111202',
+      lessonId: 'ns_place_value_1000',
+      prompt: 'In the number 729, what is the value of the digit 7?',
+      questionType: 'multiple_choice',
+      options: {
+        choices: [
+          { id: 'a', label: '70' },
+          { id: 'b', label: '700' },
+          { id: 'c', label: '7' },
+          { id: 'd', label: '7000' },
+        ],
+      },
+      hint: 'The 7 is in the hundreds place, representing 7 groups of 100.',
+      orderIndex: 2,
+    },
+    {
+      id: '11111111-1111-4111-8111-111111111203',
+      lessonId: 'ns_place_value_1000',
+      prompt: 'How many tens are in the number 420?',
+      questionType: 'numeric_input',
+      options: {
+        placeholder: 'Type the number of tens',
+      },
+      hint: 'Think: 40 tens in 400 plus 2 tens.',
+      orderIndex: 3,
+    },
+  ],
   as_mental_addition_20: [
     {
       id: '22222222-2222-4222-8222-222222222201',
@@ -184,6 +229,18 @@ export const MOCK_SOLUTIONS: Record<string, { correct: Record<string, unknown>; 
   '11111111-1111-4111-8111-111111111102': {
     correct: { value: '6' },
     explanation: 'In 63, the 6 represents 6 tens (60), and the 3 represents 3 ones.',
+  },
+  '11111111-1111-4111-8111-111111111201': {
+    correct: { choiceId: 'a', value: '538' },
+    explanation: '5 hundreds (500) + 3 tens (30) + 8 ones (8) = 538.',
+  },
+  '11111111-1111-4111-8111-111111111202': {
+    correct: { choiceId: 'b', value: '700' },
+    explanation: 'The digit 7 is in the hundreds position, so its value is 700.',
+  },
+  '11111111-1111-4111-8111-111111111203': {
+    correct: { value: '42' },
+    explanation: '420 has 42 tens (42 x 10 = 420).',
   },
   '22222222-2222-4222-8222-222222222201': {
     correct: { choiceId: 'b', value: '15' },
