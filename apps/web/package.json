@@ -3,8 +3,8 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "dev": "next dev --port 3000",
-    "build": "next build",
+    "dev": "next dev --webpack --port 3000",
+    "build": "next build --webpack",
     "start": "next start --port 3000",
     "lint": "next lint",
     "format-check": "prettier --check .",
@@ -29,10 +29,12 @@
   "devDependencies": {
     "@mathquest/shared-config": "workspace:*",
     "@playwright/test": "1.62.1",
+    "@tailwindcss/postcss": "4.3.3",
     "@types/canvas-confetti": "1.9.0",
     "@types/node": "22.20.5",
     "@types/react": "19.2.8",
     "@types/react-dom": "19.2.7",
+    "postcss": "8.5.29",
     "prettier": "3.5.2",
     "tailwindcss": "4.3.3",
     "typescript": "7.0.2"
