@@ -44,3 +44,7 @@ test-results/
 # Supabase local state
 .supabase/
 supabase/.temp/
+
+# Auto-generated agent docs in sub-apps
+apps/*/AGENTS.md
+apps/*/CLAUDE.md
