@@ -21,7 +21,7 @@
     "@mathquest/shared-config": "workspace:*",
     "@tailwindcss/postcss": "4.3.3",
     "postcss": "8.5.29",
-    "supabase": "2.116.0",
+    "supabase": "2.119.0",
     "tailwindcss": "4.3.3",
     "typescript": "7.0.2"
   }
