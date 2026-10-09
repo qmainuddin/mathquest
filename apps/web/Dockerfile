@@ -1,7 +1,7 @@
 # Multi-stage Dockerfile for Next.js standalone application
 # Syntax and base image strictly pinned to exact version and multi-arch digest
 
-FROM node:24.20.0-bookworm-slim@sha256:ba849c60be29959425b8734d57b8b4b7d56f98edd9504c9af091d5281095a71e AS base
+FROM node:26.10.0-bookworm-slim@sha256:662933cf47f013bc8e4beb31a6116448427a82057ba7c42c97e4c5ba766504c2 AS base
 
 ENV PNPM_HOME="/pnpm"
 ENV PATH="$PNPM_HOME:$PATH"
@@ -49,7 +49,7 @@ RUN pnpm --filter @mathquest/web build
 # -----------------------------------------------------------------------------
 # Runner Stage
 # -----------------------------------------------------------------------------
-FROM node:24.20.0-bookworm-slim@sha256:ba849c60be29959425b8734d57b8b4b7d56f98edd9504c9af091d5281095a71e AS runner
+FROM node:26.10.0-bookworm-slim@sha256:662933cf47f013bc8e4beb31a6116448427a82057ba7c42c97e4c5ba766504c2 AS runner
 WORKDIR /app
 
 ENV NODE_ENV=production
