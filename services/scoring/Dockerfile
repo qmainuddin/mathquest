@@ -1,7 +1,7 @@
 # Multi-stage Dockerfile for Python Scoring Microservice
 # Syntax and base image strictly pinned to exact version and multi-arch digest
 
-FROM python:3.12.14-slim-bookworm@sha256:782412e85d0f0984994c290652577d4018aff08145c85b262bb63dc0c7522254 AS builder
+FROM python:3.15.0-slim-bookworm@sha256:0e019bbdfb5d9874cb2389f1c2884b64aa2ac97c99960b5bc521cef978c0617d AS builder
 
 WORKDIR /build
 
@@ -24,7 +24,7 @@ RUN if [ -f uv.lock ]; then \
 # -----------------------------------------------------------------------------
 # Runtime Stage
 # -----------------------------------------------------------------------------
-FROM python:3.12.14-slim-bookworm@sha256:782412e85d0f0984994c290652577d4018aff08145c85b262bb63dc0c7522254 AS runner
+FROM python:3.15.0-slim-bookworm@sha256:0e019bbdfb5d9874cb2389f1c2884b64aa2ac97c99960b5bc521cef978c0617d AS runner
 
 WORKDIR /app
 
